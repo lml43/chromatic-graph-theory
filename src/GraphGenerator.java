@@ -52,16 +52,6 @@ public class GraphGenerator {
         }
     }
 
-    private static class Vertex {
-        int index;
-        int weight;
-        int color;
-        Set<Vertex> neighbors = new HashSet<>();
-
-        public Vertex(int index) {
-            this.index = index;
-        }
-    }
 
     private static void testPrintVertices() {
         vertices.forEach(vertex -> {
