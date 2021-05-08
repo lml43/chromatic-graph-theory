@@ -1,46 +1,77 @@
-import java.util.Random;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class GraphGenerator {
 
-    // Set a maximum limit to the vertices
     private static final int MAX_VERTICES_NUMBER = 15;
-    private static Random random = new Random();
+    private static final int MAX_WEIGHT = 100;
+    private static final Random random = new Random();
 
-    static int verticesNo;
-    static int[][] adjacencyMat;
+    private static List<Vertex> vertices;
+    private static int verticesNo;
 
     public static void main(String[] args) {
+        init();
+
+    }
+
+    private static void init() {
         verticesNo = random.nextInt(MAX_VERTICES_NUMBER) + 5;
-
-        adjacencyMat = new int[verticesNo][verticesNo];
-
-        for (int i = 0; i < verticesNo - 1; i++) {
-            for (int j = i + 1; j < verticesNo; j++) {
-                adjacencyMat[i][j] = random.nextInt(2);
-            }
+        vertices = new ArrayList<>();
+        for (int i = 0; i < verticesNo; i++) {
+            vertices.add(new Vertex(i));
         }
 
-        printMat(adjacencyMat);
+        vertices = vertices.stream()
+                .peek(GraphGenerator::randomConnect)
+                .peek(GraphGenerator::randomWeight)
+                .collect(Collectors.toList());
+
+        testPrintVertices();
     }
 
-    private static void printMat(int[][] mat) {
+    private static void randomWeight(Vertex vertex) {
+        vertex.weight = random.nextInt(MAX_WEIGHT) + 1;
+    }
 
-        System.out.print(String.format("%6s", "|"));
-        for (int i = 0; i < mat[0].length; i++) {
-            System.out.print(String.format("%6s", (i+1)));
+    private static void randomConnect(Vertex vertex) {
+
+        boolean isConnected;
+        for (int i = 0; i < verticesNo; i++) {
+
+            if (i == vertex.index) {
+                continue;
+            }
+
+            isConnected = random.nextBoolean();
+            if (isConnected) {
+                Vertex neighbor = vertices.get(i);
+                vertex.neighbors.add(neighbor);
+                neighbor.neighbors.add(vertex);
+            }
         }
-        System.out.println();
-        for (int i = 0; i <= mat[0].length; i++) {
-            System.out.print("______");
+    }
+
+    private static class Vertex {
+        int index;
+        int weight;
+        int color;
+        Set<Vertex> neighbors = new HashSet<>();
+
+        public Vertex(int index) {
+            this.index = index;
         }
-        for (int i = 0; i < mat.length; i++) {
+    }
+
+    private static void testPrintVertices() {
+        vertices.forEach(vertex -> {
+            System.out.print(vertex.index + ": ");
+            for (Vertex v : vertex.neighbors) {
+                System.out.print(v.index + ", ");
+            }
             System.out.println();
-            System.out.print(String.format("%6s", (i+1)+" |"));
-            for (int j = 0; j < mat[i].length; j++) {
-                System.out.print(String.format("%6s", mat[i][j]));
-            }
-        }
-        System.out.println();
+        });
     }
+
 
 }
