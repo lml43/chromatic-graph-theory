@@ -1,3 +1,8 @@
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -11,11 +16,12 @@ public class GraphGenerator {
     private static int verticesNo;
 
     public static void main(String[] args) {
-        init();
+        generate();
 
+//        List<Vertex> vertices = getVerticesFromFile("input/graph-2021-06-05T15:55:43.025.txt");
     }
 
-    private static void init() {
+    private static void generate() {
         verticesNo = random.nextInt(MAX_VERTICES_NUMBER) + 5;
         vertices = new ArrayList<>();
         for (int i = 0; i < verticesNo; i++) {
@@ -27,7 +33,7 @@ public class GraphGenerator {
                 .peek(GraphGenerator::randomWeight)
                 .collect(Collectors.toList());
 
-        testPrintVertices();
+        writeToFile();
     }
 
     private static void randomWeight(Vertex vertex) {
@@ -53,14 +59,65 @@ public class GraphGenerator {
     }
 
 
-    private static void testPrintVertices() {
-        vertices.forEach(vertex -> {
-            System.out.print(vertex.index + ": ");
-            for (Vertex v : vertex.neighbors) {
-                System.out.print(v.index + ", ");
+    private static void writeToFile() {
+        LocalDateTime now = LocalDateTime.now();
+        try(FileWriter myWriter = new FileWriter("input/graph-"+ now + ".txt")) {
+            StringBuilder builder = new StringBuilder();
+            builder.append(vertices.size()).append('\n');
+
+            vertices.forEach(vertex -> {
+                builder.append(vertex.index).append(" : ");
+                builder.append(vertex.weight).append(" : ");
+                for (Vertex v : vertex.neighbors) {
+                    builder.append(v.index).append(", ");
+                }
+                builder.append('\n');
+            });
+
+            myWriter.write(builder.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    public static List<Vertex> getVerticesFromFile(String filename) {
+        File myObj = new File(filename);
+        List<Vertex> vertices = new ArrayList<>();
+
+        try(Scanner myReader = new Scanner(myObj)) {
+            int size = Integer.parseInt(myReader.nextLine());
+
+            for (int i = 0; i < size; i++) {
+                vertices.add(new Vertex(i));
             }
-            System.out.println();
-        });
+
+            while (myReader.hasNextLine()) {
+
+                String data = myReader.nextLine();
+
+                String[] split = data.split(" : ");
+                String[] neighborsStr = split[2].split(", ");
+
+                int index = Integer.parseInt(split[0]);
+                int weight = Integer.parseInt(split[1]);
+
+                Set<Vertex> neighbors = new HashSet<>();
+                for (String neighborStr :neighborsStr) {
+                    int neighborIdx = Integer.parseInt(neighborStr);
+                    neighbors.add(vertices.get(neighborIdx));
+                }
+
+                vertices.get(index).setWeight(weight);
+                vertices.get(index).setNeighbors(neighbors);
+
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return vertices;
     }
 
 

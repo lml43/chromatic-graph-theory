@@ -1,7 +1,7 @@
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Algorithm {
+public class Algorithm1 {
 
     private static List<Vertex> vertices;
 
@@ -10,7 +10,9 @@ public class Algorithm {
             .reversed();
 
     public static void main(String[] args) {
-        init();
+        vertices = GraphGenerator.getVerticesFromFile("input/graph-2021-06-05T16:09:54.047.txt");
+//        init();
+
         List<Vertex> remainingVertices = vertices.stream()
                 .sorted(byWeightDesc)
                 .collect(Collectors.toList());
@@ -42,6 +44,9 @@ public class Algorithm {
             currentColor++;
         } while (!remainingVertices.isEmpty());
 
+        for (Vertex vertex : vertices) {
+            System.out.println("V" + vertex.index + ": " + vertex.color);
+        }
     }
 
     private static void init() {
